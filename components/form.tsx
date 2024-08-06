@@ -1,10 +1,14 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
 
-type FormFields = {
-  email: string;
-  password: string;
-};
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+type FormFields = z.infer<typeof schema>;
 
 export default function Form() {
   const {
@@ -13,10 +17,7 @@ export default function Form() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    resolver: zodResolver(schema),
   });
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
@@ -32,14 +33,14 @@ export default function Form() {
   return (
     <form className='grid gap-2' onSubmit={handleSubmit(onSubmit)}>
       <input
-        {...(register("email"), { required: true })}
+        {...register("email")}
         className='py-2 px-3 text-black rounded-md'
         type='text'
         placeholder='Email'
       />
       {errors.email && <span className='text-red-600'>{errors.email.message}</span>}
       <input
-        {...(register("password"), { required: true, minLength: 6 })}
+        {...register("password")}
         className='py-2 px-3 text-black rounded-md'
         type='password'
         placeholder='Password'
